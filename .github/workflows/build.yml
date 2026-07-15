@@ -4,8 +4,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+ build:
     runs-on: ubuntu-latest
+
+    env:
+      TERM: xterm
 
     steps:
       - name: Checkout
@@ -35,16 +38,32 @@ jobs:
             glslang-tools \
             patchelf
 
+      - name: Show environment
+        run: |
+          echo "TERM=$TERM"
+          uname -a
+          pwd
+          ls -la
+
       - name: Make script executable
         run: chmod +x build-turnip.sh
 
       - name: Build Turnip
-        run: ./build-turnip.sh
+        run: |
+          export TERM=xterm
+          ./build-turnip.sh
+
+      - name: Show generated files
+        if: always()
+        run: |
+          find . -name "*.zip"
+          find . -name "libvulkan_freedreno.so"
 
       - name: Upload Turnip
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Turnip
           path: |
-            turnip_workdir/**/*.zip
-            turnip_workdir/**/libvulkan_freedreno.so
+            **/*.zip
+            **/libvulkan_freedreno.so
