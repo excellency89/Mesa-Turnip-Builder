@@ -1,0 +1,50 @@
+name: Build Turnip
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install packages
+        run: |
+          sudo apt update
+          sudo apt install -y \
+            curl \
+            wget \
+            unzip \
+            zip \
+            python3 \
+            python3-pip \
+            python3-venv \
+            meson \
+            ninja-build \
+            clang \
+            llvm \
+            lld \
+            cmake \
+            build-essential \
+            pkg-config \
+            flex \
+            bison \
+            glslang-tools \
+            patchelf
+
+      - name: Make script executable
+        run: chmod +x build-turnip.sh
+
+      - name: Build Turnip
+        run: ./build-turnip.sh
+
+      - name: Upload Turnip
+        uses: actions/upload-artifact@v4
+        with:
+          name: Turnip
+          path: |
+            turnip_workdir/**/*.zip
+            turnip_workdir/**/libvulkan_freedreno.so
