@@ -4,66 +4,100 @@ on:
   workflow_dispatch:
 
 jobs:
- build:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-24.04
 
     env:
       TERM: xterm
 
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install packages
+      - name: Install Dependencies
         run: |
           sudo apt update
+
           sudo apt install -y \
-            curl \
-            wget \
-            unzip \
-            zip \
-            python3 \
-            python3-pip \
-            python3-venv \
-            meson \
-            ninja-build \
+            build-essential \
             clang \
             llvm \
             lld \
             cmake \
-            build-essential \
+            meson \
+            ninja-build \
             pkg-config \
+            patchelf \
+            python3 \
+            python3-pip \
+            python3-venv \
+            python3-mako \
+            python-is-python3 \
             flex \
             bison \
             glslang-tools \
-            patchelf
+            vulkan-tools \
+            unzip \
+            zip \
+            wget \
+            curl \
+            git \
+            ccache
 
-      - name: Show environment
+      - name: Environment Info
         run: |
-          echo "TERM=$TERM"
+          echo "===== SYSTEM ====="
           uname -a
-          pwd
-          ls -la
 
-      - name: Make script executable
+          echo "===== CLANG ====="
+          clang --version
+
+          echo "===== MESON ====="
+          meson --version
+
+          echo "===== NINJA ====="
+          ninja --version
+
+          echo "===== CMAKE ====="
+          cmake --version
+
+          echo "===== PKG-CONFIG ====="
+          pkg-config --version
+
+          echo "===== CCACHE ====="
+          ccache --version
+
+      - name: Make build script executable
         run: chmod +x build-turnip.sh
 
-      - name: Build Turnip
+      - name: Run Build Script
         run: |
-          export TERM=xterm
+          set -ex
           ./build-turnip.sh
 
-      - name: Show generated files
+      - name: Show Output Files
         if: always()
         run: |
+          echo "===== GENERATED FILES ====="
           find . -name "*.zip"
-          find . -name "libvulkan_freedreno.so"
+          find . -name "*.so"
+          find . -name "meson-log.txt"
 
-      - name: Upload Turnip
+      - name: Upload Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Build-Logs
+          path: |
+            **/meson_log
+            **/meson-log.txt
+            **/ninja_log
+
+      - name: Upload Driver
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Turnip
           path: |
             **/*.zip
-            **/libvulkan_freedreno.so
+            **/*.so
