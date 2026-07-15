@@ -94,11 +94,9 @@ jobs:
             **/meson-log.txt
             **/ninja_log
 
-      - name: Upload Turnip
-        if: always()
+      - name: Upload Turnip Driver
         uses: actions/upload-artifact@v4
         with:
-          name: Turnip
+          name: Turnip-Driver
           path: |
-            **/*.zip
-            **/*.so
+           turnip_workdir/*EMULATOR.zip
