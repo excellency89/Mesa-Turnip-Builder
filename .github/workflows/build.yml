@@ -17,14 +17,12 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-
           sudo apt install -y \
             build-essential \
             clang \
             llvm \
             lld \
             cmake \
-            meson \
             ninja-build \
             pkg-config \
             patchelf \
@@ -44,34 +42,35 @@ jobs:
             git \
             ccache
 
+      - name: Install Latest Meson
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install "meson>=1.5.0"
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Environment Info
         run: |
+          export PATH="$HOME/.local/bin:$PATH"
           echo "===== SYSTEM ====="
           uname -a
+
+          echo "===== MESON ====="
+          which meson
+          meson --version
 
           echo "===== CLANG ====="
           clang --version
 
-          echo "===== MESON ====="
-          meson --version
-
           echo "===== NINJA ====="
           ninja --version
-
-          echo "===== CMAKE ====="
-          cmake --version
-
-          echo "===== PKG-CONFIG ====="
-          pkg-config --version
-
-          echo "===== CCACHE ====="
-          ccache --version
 
       - name: Make build script executable
         run: chmod +x build-turnip.sh
 
       - name: Run Build Script
         run: |
+          export TERM=xterm
+          export PATH="$HOME/.local/bin:$PATH"
           set -ex
           ./build-turnip.sh
 
@@ -81,7 +80,9 @@ jobs:
           echo "===== GENERATED FILES ====="
           find . -name "*.zip"
           find . -name "*.so"
+          find . -name "meson_log"
           find . -name "meson-log.txt"
+          find . -name "ninja_log"
 
       - name: Upload Logs
         if: always()
@@ -93,7 +94,7 @@ jobs:
             **/meson-log.txt
             **/ninja_log
 
-      - name: Upload Driver
+      - name: Upload Turnip
         if: always()
         uses: actions/upload-artifact@v4
         with:
