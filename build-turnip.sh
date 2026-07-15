@@ -148,7 +148,16 @@ CC=clang CXX=clang++ meson setup build-android-aarch64 \
     -Dvulkan-drivers=freedreno \
     -Dfreedreno-kmds=kgsl \
     -Degl=disabled \
-    -Dstrip=true &> $workdir/meson_log
+    -Dstrip=true |& tee "$workdir/meson_log"
+    
+status=$?
+
+if [ $status -ne 0 ]; then
+    echo "========== MESON LOG =========="
+    cat "$workdir/meson_log"
+    echo "==============================="
+    exit $status
+fi
 
 # Compile build files using Ninja
 echo "Compiling build files..." $'\n'
