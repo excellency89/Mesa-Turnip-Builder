@@ -136,8 +136,10 @@ cpu = 'x86_64'
 endian = 'little'
 EOF
 
+export PATH="$HOME/.local/bin:$PATH"
+
 echo "Generating build files..." $'\n'
-CC=clang CXX=clang++ meson setup build-android-aarch64 \
+CC=clang CXX=clang++ "$HOME/.local/bin/meson" setup build-android-aarch64 \
     --cross-file "$workdir/$mesadir/android-aarch64.txt" \
     --native-file "$workdir/$mesadir/native.txt" \
     -Dbuildtype=release \
